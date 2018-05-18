@@ -3,8 +3,7 @@
 #include <chrono>
 #define FTD2XX_EXPORTS
 #include "ftd2xx.h"
-
-#define MY_LCD_DESCRIPTION "EDA LCD 1 B" // CAMBIAR LA DESCRIPCION SEGUN EL GRUPO
+#include "LCDlib.h"
 
 #define CONNECTING_TIME 5 //in seconds
 

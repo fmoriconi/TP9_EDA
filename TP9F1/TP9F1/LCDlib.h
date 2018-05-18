@@ -1,4 +1,6 @@
 #pragma once
+#include"ftd2xx.h"
+#include "Timer.h"
 
 //Puertos fisicos
 #define PORT_P0 0
@@ -31,3 +33,8 @@
 #define LCD_FUNCTION_RS_DATA_REGISTER (LCD_RS)
 #define LCD_FUNCTION_CLEAR_DISPLAY (0x01)
 #define LCD_FUNCTION_RETURN_HOME (0x02)
+
+#define MY_LCD_DESCRIPTION "EDA LCD 3 B"
+
+FT_HANDLE * lcdInit(int iDevice);
+
