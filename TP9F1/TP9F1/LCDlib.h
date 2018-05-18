@@ -15,6 +15,10 @@
 //Puertos logicos
 #define LCD_ENABLE	(1<<PORT_P0)
 #define LCD_RS	(1<<PORT_P1)
+#define LCD_D0 (1<<PORT_P0)
+#define LCD_D1	(1<<PORT_P1)
+#define LCD_D2	(1<<PORT_P2)
+#define LCD_D3	(1<<PORT_P3)
 #define LCD_D4	(1<<PORT_P4)
 #define LCD_D5	(1<<PORT_P5)
 #define LCD_D6	(1<<PORT_P6)
