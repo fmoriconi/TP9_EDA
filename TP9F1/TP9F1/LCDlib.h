@@ -26,6 +26,7 @@
 
 //Mascaras utiles
 
+#define LCD_BYTE (0xFF)
 #define LCD_HIGH_NIBBLE (LCD_D4|LCD_D5|LCD_D6|LCD_D7)
 #define LCD_LOW_NIBBLE (~(LCD_HIGH_NIBBLE))
 

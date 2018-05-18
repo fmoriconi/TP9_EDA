@@ -6,13 +6,15 @@ FT_HANDLE * lcdInit(FT_HANDLE * handle)
 	Timer timer;
 	//FT_HANDLE * handle;
 	DWORD byteswritten;
+	UCHAR buffer;
 	FT_STATUS status = FT_OpenEx((PVOID)MY_LCD_DESCRIPTION, FT_OPEN_BY_DESCRIPTION, handle);
 	if (status == FT_OK)
 	{
-		status = FT_SetBitMode((*handle), 0xff, 1);
+		status = FT_SetBitMode((*handle), 0xff, 1);  
 		if (status == FT_OK)
 		{
-			status=FT_Write(*handle, (LPVOID)(LCD_D5 | LCD_D4) /*((0xff) ^ LCD_D0 ^ LCD_D1 ^LCD_D2 )*/, 1, &byteswritten);
+			buffer = (LCD_D5 | LCD_D4);
+			status=FT_Write(*handle, &buffer, 1, &byteswritten);
 			timer.start();
 			do
 			{
