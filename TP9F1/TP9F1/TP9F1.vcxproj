@@ -79,11 +79,11 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\Users\frank\OneDrive\Documentos\GitHub\TP9_EDA\TP9F1\TP9F1\LibAdicional;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\LibAdicional;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <TreatWarningAsError>true</TreatWarningAsError>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>C:\Users\frank\OneDrive\Documentos\GitHub\TP9_EDA\TP9F1\TP9F1\LibAdicional\i386;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>.\LibAdicional\i386;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>ftd2xx.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <ProjectReference>
