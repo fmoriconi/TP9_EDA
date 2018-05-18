@@ -40,5 +40,5 @@
 
 #define MY_LCD_DESCRIPTION "EDA LCD 3 B"
 
-FT_HANDLE * lcdInit(int iDevice);
+FT_HANDLE * lcdInit(FT_HANDLE * handle);
 
