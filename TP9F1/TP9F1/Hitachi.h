@@ -48,12 +48,12 @@
 
 #define MY_LCD_DESCRIPTION "EDA LCD 3 B"
 #define LCD_MAX_CONNECTION_TIME 5000
+#define LCD_WAIT_TIME 4
+
+enum class RS { INSTRUCTION_REGISTER, DATA_REGISTER };
 
 class Hitachi : public basicLCD
 {
-
-	enum class RS { INSTRUCTION_REGISTER, DATA_REGISTER };
-
 public:
 
 	//Constructor y destructor
@@ -61,12 +61,13 @@ public:
 	~Hitachi();
 
 	//Escritura
-	FT_STATUS sendNybble(RS registerselect, UCHAR data);
-	FT_STATUS sendByte(RS, UCHAR data);
+	void sendNybble(RS registerselect, UCHAR data);
+	void sendByte(RS, UCHAR data);
 
 	//--------Métodos públicos heredados--------//
 
 	//Getters
+	void wait(float ms) { auxtimer.start(); do { auxtimer.stop(); } while (auxtimer.getTime() < LCD_WAIT_TIME); }
 	bool lcdInitOk() { return !initerror; }
 	FT_STATUS lcdGetError() { return this->status; }
 
@@ -92,6 +93,7 @@ private:
 	FT_HANDLE handle;
 	FT_STATUS status;
 	DWORD bytesWritten;
+	Timer auxtimer;
 	bool initerror = true;
 };
 
