@@ -45,6 +45,10 @@
 #define LCD_FUNCTION_DISPLAY_CONTROL_OFF (LCD_D3)
 #define LCD_FUNCTION_FUNCTION_SET_4_BIT	(LCD_D4|LCD_D3)
 #define LCD_FUNCTION_FUNCTION_SET_8_BIT (LCD_D5|LCD_D4|LCD_D3)
+#define LCD_FUNCTION_CURSOR_SHIFT (LCD_D4) //LCD_D2 debe setearse según se desee mover para la izquierda o para la derecha.
+
+#define LCD_SPACE_CHAR 0x20 /// Por ahora pongo este pero ni idea si está bien. Creo que si igual.
+
 
 #define MY_LCD_DESCRIPTION "EDA LCD 3 B"
 #define LCD_MAX_CONNECTION_TIME 5000
@@ -52,8 +56,7 @@
 
 enum class RS { INSTRUCTION_REGISTER, DATA_REGISTER };
 
-class Hitachi : public basicLCD
-{
+class Hitachi{
 public:
 
 	//Constructor y destructor
@@ -90,10 +93,17 @@ public:
 	cursorPosition lcdGetCursorPosition();
 
 private:
+
 	FT_HANDLE handle;
 	FT_STATUS status;
 	DWORD bytesWritten;
 	Timer auxtimer;
-	bool initerror = true;
-};
 
+	bool initerror = true;
+
+	int cadd = 0; //Cursor Address.
+	int lastCadd = 0; //Variable que me srive para saber como y cuanto mover el cursor tras modificar cadd, ya que no puedo leer el cursor desde el FTDI.
+
+	void lcdUpdateCursor();
+
+};

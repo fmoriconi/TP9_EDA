@@ -5,7 +5,6 @@
 
 #define FTD2XX_EXPORTS
 #include "ftd2xx.h"
-#include "LCDlib.h"
 #include "Hitachi.h"
 
 int main(void)

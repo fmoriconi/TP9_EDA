@@ -20,7 +20,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Hitachi.cpp" />
-    <ClCompile Include="LCDlib.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Timer.cpp" />
   </ItemGroup>

@@ -4,8 +4,8 @@
 
 struct cursorPosition
 {
-	int row;
-	int column;
+	int row; // Va de 0 a 1
+	int column; //Va de 0 a 15
 };
 
 class basicLCD
@@ -42,7 +42,7 @@ protected:
 
 	int cadd; //Variable correspondiente a la posición del cursor pues no la podemos leer, pero si llevar la cuenta de su posición.
 
-	void lcdUpdateCursor(); //Actualización del cursor.
+	virtual void lcdUpdateCursor() = 0; //Actualización del cursor.
 
 };
 
