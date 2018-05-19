@@ -47,22 +47,24 @@
 
 #define MY_LCD_DESCRIPTION "EDA LCD 3 B"
 #define LCD_MAX_CONNECTION_TIME 5000
+#define LCD_WAIT_TIME 4
+
+enum class RS { INSTRUCTION_REGISTER, DATA_REGISTER };
 
 class Hitachi
 {
-
-	enum class RS { INSTRUCTION_REGISTER, DATA_REGISTER };
-
 public:
 	Hitachi();
 	~Hitachi();
-	FT_STATUS sendNybble(RS registerselect, UCHAR data);
-	FT_STATUS sendByte(RS, UCHAR data);
+	void wait(float ms) { auxtimer.start(); do { auxtimer.stop(); } while (auxtimer.getTime() < LCD_WAIT_TIME); }
+	void sendNybble(RS registerselect, UCHAR data);
+	void sendByte(RS registerselect, UCHAR data);
 	bool lcdInitOk() { return !initerror; }
 private:
 	FT_HANDLE handle;
 	FT_STATUS status;
 	DWORD bytesWritten;
+	Timer auxtimer;
 	bool initerror = true;
 };
 
