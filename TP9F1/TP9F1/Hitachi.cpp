@@ -52,12 +52,9 @@ void Hitachi::sendNybble(RS registerselect, UCHAR data)
 {
 	UCHAR buffer;
 
-	buffer = buffer & LCD_HIGH_NIBBLE;										//Limpio el low nibble
-	buffer = buffer & LCD_FUNCTION_ENABLE_OFF;								//Apago enable
-	if (registerselect == RS::INSTRUCTION_REGISTER) {						//Pongo register select en intruction register
-		buffer = buffer & LCD_FUNCTION_RS_INSTRUCTION_REGISTER;	
-	}
-	else if (registerselect == RS::DATA_REGISTER){							//Pongo register select en data register
+	buffer = data << 4;
+	buffer = buffer & LCD_HIGH_NIBBLE;										//Limpio el low nibble y apago enable y register select
+	if (registerselect == RS::DATA_REGISTER) {								//Si me piden data register prendo register select
 		buffer = buffer | LCD_FUNCTION_RS_DATA_REGISTER;
 	}
 	this->status = FT_Write(this->handle, &buffer, 2, &bytesWritten);		//Escribo a LCD
@@ -65,7 +62,7 @@ void Hitachi::sendNybble(RS registerselect, UCHAR data)
 	buffer = buffer | LCD_FUNCTION_ENABLE_ON;								//Prendo enable
 	this->status = FT_Write(this->handle, &buffer, 2, &bytesWritten);		//Escribo a LCD
 	this->wait(LCD_WAIT_TIME);												//Espero
-	buffer = buffer & LCD_FUNCTION_ENABLE_OFF;								//Apago enable
+	buffer = buffer ^ LCD_FUNCTION_ENABLE_ON;								//Apago enable
 	this->status = FT_Write(this->handle, &buffer, 2, &bytesWritten);		//Escribo a LCD
 	this->wait(LCD_WAIT_TIME);												//Espero
 
@@ -75,7 +72,7 @@ void Hitachi::sendByte(RS registerselect, UCHAR data)
 {
 	UCHAR buffer = data;
 	this->sendNybble(registerselect, buffer);								//Mando la parte superior de data como nybble
-	buffer = data << 4;														//Mando low nybble de data a su high nybble
+	buffer = data >> 4;														//Mando low nybble de data a su high nybble
 	buffer = buffer & LCD_HIGH_NIBBLE;										//Limpio el low nybble de data
 	this->sendNybble(registerselect, buffer);								//Mando la parte superior de data como nybble
 

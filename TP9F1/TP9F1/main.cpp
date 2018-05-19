@@ -11,8 +11,12 @@
 int main(void)
 {
 	Hitachi hitachi;
-	bool isok = hitachi.lcdInitOk();
-	std::cout << isok;
+	if (hitachi.lcdInitOk()) {
+		hitachi.sendByte(RS::DATA_REGISTER, 0x41);
+		std::cout << "nice";
+	}
+	else
+		std::cout << "fuck";
 	getchar();
 	return 0;
 }
