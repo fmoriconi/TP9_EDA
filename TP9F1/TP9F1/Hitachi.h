@@ -1,5 +1,6 @@
 #pragma once
 
+#include "basicLCD.h"
 #include <iostream>
 #include "Timer.h"
 #include "ftd2xx.h"
@@ -48,17 +49,45 @@
 #define MY_LCD_DESCRIPTION "EDA LCD 3 B"
 #define LCD_MAX_CONNECTION_TIME 5000
 
-class Hitachi
+class Hitachi : public basicLCD
 {
 
 	enum class RS { INSTRUCTION_REGISTER, DATA_REGISTER };
 
 public:
+
+	//Constructor y destructor
 	Hitachi();
 	~Hitachi();
+
+	//Escritura
 	FT_STATUS sendNybble(RS registerselect, UCHAR data);
 	FT_STATUS sendByte(RS, UCHAR data);
+
+	//--------Métodos públicos heredados--------//
+
+	//Getters
 	bool lcdInitOk() { return !initerror; }
+	FT_STATUS lcdGetError() { return this->status; }
+
+	//Screenclear
+	bool lcdClear();
+	bool lcdClearToEOL();
+
+	//Operadores
+	basicLCD& operator<<(const unsigned char c);
+	basicLCD& operator<<(const unsigned char * c);
+
+	//Movimiento del cursor
+	bool lcdMoveCursorUp();
+	bool lcdMoveCursorDown();
+	bool lcdMoveCursorRight();
+	bool lcdMoveCursorLeft();
+
+	bool lcdSetCursorPosition(const cursorPosition pos);
+
+	cursorPosition lcdGetCursorPosition();
+
 private:
 	FT_HANDLE handle;
 	FT_STATUS status;

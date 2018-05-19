@@ -57,3 +57,17 @@ FT_STATUS Hitachi::sendByte(RS, UCHAR data)
 {
 	return FT_STATUS();
 }
+
+bool Hitachi::lcdClear() {
+
+
+	bool success = false;
+
+	sendByte(RS::INSTRUCTION_REGISTER, LCD_FUNCTION_CLEAR_DISPLAY);
+
+	if (this->status == FT_OK)
+		success = true;
+
+	return success;
+
+}
