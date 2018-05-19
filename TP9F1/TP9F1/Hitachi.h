@@ -1,5 +1,6 @@
 #pragma once
 
+#include "basicLCD.h"
 #include <iostream>
 #include "Timer.h"
 #include "ftd2xx.h"
@@ -51,15 +52,43 @@
 
 enum class RS { INSTRUCTION_REGISTER, DATA_REGISTER };
 
-class Hitachi
+class Hitachi : public basicLCD
 {
 public:
+
+	//Constructor y destructor
 	Hitachi();
 	~Hitachi();
-	void wait(float ms) { auxtimer.start(); do { auxtimer.stop(); } while (auxtimer.getTime() < LCD_WAIT_TIME); }
+
+	//Escritura
 	void sendNybble(RS registerselect, UCHAR data);
-	void sendByte(RS registerselect, UCHAR data);
+	void sendByte(RS, UCHAR data);
+
+	//--------Métodos públicos heredados--------//
+
+	//Getters
+	void wait(float ms) { auxtimer.start(); do { auxtimer.stop(); } while (auxtimer.getTime() < LCD_WAIT_TIME); }
 	bool lcdInitOk() { return !initerror; }
+	FT_STATUS lcdGetError() { return this->status; }
+
+	//Screenclear
+	bool lcdClear();
+	bool lcdClearToEOL();
+
+	//Operadores
+	basicLCD& operator<<(const unsigned char c);
+	basicLCD& operator<<(const unsigned char * c);
+
+	//Movimiento del cursor
+	bool lcdMoveCursorUp();
+	bool lcdMoveCursorDown();
+	bool lcdMoveCursorRight();
+	bool lcdMoveCursorLeft();
+
+	bool lcdSetCursorPosition(const cursorPosition pos);
+
+	cursorPosition lcdGetCursorPosition();
+
 private:
 	FT_HANDLE handle;
 	FT_STATUS status;

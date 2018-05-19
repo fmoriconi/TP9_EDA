@@ -77,3 +77,17 @@ void Hitachi::sendByte(RS registerselect, UCHAR data)
 	this->sendNybble(registerselect, buffer);								//Mando la parte superior de data como nybble
 
 }
+
+bool Hitachi::lcdClear() {
+
+
+	bool success = false;
+
+	sendByte(RS::INSTRUCTION_REGISTER, LCD_FUNCTION_CLEAR_DISPLAY);
+
+	if (this->status == FT_OK)
+		success = true;
+
+	return success;
+
+}

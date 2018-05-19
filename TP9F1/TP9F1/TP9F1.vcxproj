@@ -25,8 +25,8 @@
     <ClCompile Include="Timer.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="basicLCD.h" />
     <ClInclude Include="Hitachi.h" />
-    <ClInclude Include="LCDlib.h" />
     <ClInclude Include="Timer.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
