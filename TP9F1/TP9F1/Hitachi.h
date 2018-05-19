@@ -66,6 +66,7 @@ public:
 	//Escritura
 	void sendNybble(RS registerselect, UCHAR data);
 	void sendByte(RS, UCHAR data);
+	void sendBytePreInit(UCHAR data);
 
 	//--------Métodos públicos heredados--------//
 

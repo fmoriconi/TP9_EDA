@@ -7,204 +7,50 @@ Hitachi::Hitachi()
 	UCHAR buffer;
 	Timer timer, maxconnectiontime;
 
-	while (!FT_OK && maxconnectiontime.getTime() < LCD_MAX_CONNECTION_TIME) {
+	while (this->status = !FT_OK && maxconnectiontime.getTime() < LCD_MAX_CONNECTION_TIME) {
 		if (FT_OpenEx((PVOID)MY_LCD_DESCRIPTION, FT_OPEN_BY_DESCRIPTION, &(this->handle)) == FT_OK) {
 			if (FT_SetBitMode((handle), LCD_BYTE, 1) == FT_OK) {
-				buffer = LCD_FUNCTION_FUNCTION_SET_8_BIT & LCD_HIGH_NIBBLE;
-				if (FT_Write(handle, &buffer, 1, &bytesWritten) == FT_OK) {
-					this->wait(5);
-					if (FT_Write(handle, &buffer, 1, &bytesWritten) == FT_OK) {
-						this->wait(5);
-						if (FT_Write(handle, &buffer, 1, &bytesWritten) == FT_OK) {
-							buffer = LCD_FUNCTION_FUNCTION_SET_4_BIT && LCD_HIGH_NIBBLE;
-							if (FT_Write(handle, &buffer, 1, &bytesWritten) == FT_OK) {
-								sendByte(RS::INSTRUCTION_REGISTER, LCD_FUNCTION_FUNCTION_SET_4_BIT);
-								sendByte(RS::INSTRUCTION_REGISTER, LCD_FUNCTION_DISPLAY_CONTROL_OFF);
-								sendByte(RS::INSTRUCTION_REGISTER, LCD_FUNCTION_CLEAR_DISPLAY);
-								sendByte(RS::INSTRUCTION_REGISTER, LCD_FUNCTION_ENTRY_MODE_SET);
-							}
-						}
-					}
-				}
+				sendBytePreInit(LCD_FUNCTION_FUNCTION_SET_8_BIT & LCD_HIGH_NIBBLE);
+				sendBytePreInit(LCD_FUNCTION_FUNCTION_SET_8_BIT & LCD_HIGH_NIBBLE);
+				sendBytePreInit(LCD_FUNCTION_FUNCTION_SET_8_BIT & LCD_HIGH_NIBBLE);
+				sendBytePreInit(LCD_FUNCTION_FUNCTION_SET_8_BIT & LCD_HIGH_NIBBLE);
+				sendByte(RS::INSTRUCTION_REGISTER, LCD_FUNCTION_FUNCTION_SET_4_BIT);
+				sendByte(RS::INSTRUCTION_REGISTER, LCD_FUNCTION_DISPLAY_CONTROL_OFF);
+				sendByte(RS::INSTRUCTION_REGISTER, LCD_FUNCTION_CLEAR_DISPLAY);
+				sendByte(RS::INSTRUCTION_REGISTER, LCD_FUNCTION_ENTRY_MODE_SET);
+				this->status = FT_OK;
 			}
 		}
+		maxconnectiontime.stop();
 	}
+
 	if (this->status != FT_OK) {
 		std::cout << "sos puto" << std::endl;
 		getchar();
 	}
-
-
-
-	//while (!FT_OK && maxconnectiontime.getTime() < LCD_MAX_CONNECTION_TIME) {
-	//	if (FT_OpenEx((PVOID)MY_LCD_DESCRIPTION, FT_OPEN_BY_DESCRIPTION, &(this->handle)) == FT_OK) {		//OPENEX
-	//		
-	//		if (FT_SetBitMode((handle), LCD_BYTE, 1) == FT_OK) {											//SETBITMODE
-
-	//			buffer = LCD_FUNCTION_FUNCTION_SET_8_BIT;													//WRITE 8BIT
-	//			buffer = (buffer >> 4);
-	//			sendNybble(RS::INSTRUCTION_REGISTER, buffer);
-
-	//			if (this->status == FT_OK) {																
-
-	//				do { timer.stop(); } while (timer.getTime() < 4);										//WAIT 4MS
-	//				sendNybble(RS::INSTRUCTION_REGISTER, buffer);											//WRITE 8BIT
-
-	//				if (this->status == FT_OK) {															
-
-	//					do { timer.stop(); } while (timer.getTime() < 1);									//WAIT 100microS (ya fue, 1ms)
-	//					sendNybble(RS::INSTRUCTION_REGISTER, buffer);										//WRITE 8BIT
-
-	//					if (this->status == FT_OK) {												
-
-	//						buffer = LCD_FUNCTION_FUNCTION_SET_4_BIT;										//WRITE 4BIT
-	//						buffer = (buffer >> 4);
-	//						sendNybble(RS::INSTRUCTION_REGISTER, buffer);
-
-	//						if (this->status == FT_OK) {						
-
-	//							buffer = LCD_FUNCTION_FUNCTION_SET_4_BIT | LCD_D3;							//WRITE 4BIT
-	//							sendByte(RS::INSTRUCTION_REGISTER, buffer);
-
-	//							if (this->status == FT_OK) {			
-
-	//								buffer = LCD_FUNCTION_DISPLAY_CONTROL_OFF;								//DISP OFF
-	//								sendByte(RS::INSTRUCTION_REGISTER, buffer);
-
-	//								if (this->status == FT_OK) {		
-
-	//									buffer = LCD_FUNCTION_CLEAR_DISPLAY;								//CLEAR DISP
-	//									sendByte(RS::INSTRUCTION_REGISTER, buffer);
-
-	//									if (this->status == FT_OK) {	
-
-	//										buffer = LCD_FUNCTION_ENTRY_MODE_SET;							//ENTRY MODE SET
-	//										sendByte(RS::INSTRUCTION_REGISTER, buffer);
-
-	//										if (this->status == FT_OK) {	
-	//											this->initerror = false;
-	//											this->status = FT_OK;
-	//										}
-	//									}
-	//								}
-	//							}
-	//						}
-	//					}
-	//				}
-	//			}
-	//		}
-	//	}
-
-	//	maxconnectiontime.stop();
-	//}
-	//if (this->status != FT_OK) {
-	//	std::cout << "Could not open Hitachi HD44780: " << MY_LCD_DESCRIPTION << std::endl;
-	//}
-
-
-	//while (!FT_OK && maxconnectiontime.getTime() < LCD_MAX_CONNECTION_TIME) {
-	//	if (FT_OpenEx((PVOID)MY_LCD_DESCRIPTION, FT_OPEN_BY_DESCRIPTION, &(this->handle)) == FT_OK) {		//OPENEX
-	//		if (FT_SetBitMode((handle), LCD_BYTE, 1) == FT_OK) {											//SETBITMODE
-	//			buffer = LCD_FUNCTION_FUNCTION_SET_8_BIT;
-	//			if (FT_Write(this->handle, &buffer, 1, &bytesWritten) == FT_OK) {							//WRITE 8BIT
-	//				do { timer.stop(); } while (timer.getTime() < 4);										//WAIT 4MS
-
-	//				if (FT_Write(this->handle, &buffer, 1, &bytesWritten) == FT_OK) {						//WRITE 8BIT
-	//					do { timer.stop(); } while (timer.getTime() < 1);									//WAIT 100microS (ya fue, 1ms)
-
-	//					if (FT_Write(this->handle, &buffer, 1, &bytesWritten) == FT_OK) {					//WRITE 8BIT
-	//						buffer = LCD_FUNCTION_FUNCTION_SET_4_BIT;
-
-	//						if (FT_Write(this->handle, &buffer, 1, &bytesWritten) == FT_OK) {				//WRITE 4BIT
-
-	//							if (FT_Write(this->handle, &buffer, 2, &bytesWritten) == FT_OK) {			//WRITE 4BIT
-	//								buffer = LCD_FUNCTION_DISPLAY_CONTROL_OFF;
-
-	//								if (FT_Write(this->handle, &buffer, 2, &bytesWritten) == FT_OK) {		//DISP OFF
-	//									buffer = LCD_FUNCTION_CLEAR_DISPLAY;
-
-	//									if (FT_Write(this->handle, &buffer, 2, &bytesWritten) == FT_OK) {	//CLEAR DISP
-	//										buffer = LCD_FUNCTION_ENTRY_MODE_SET;
-
-	//										if (FT_Write(this->handle, &buffer, 2, &bytesWritten) == FT_OK) {	//ENTRY MODE SET
-	//											this->initerror = false;
-	//											this->status = FT_OK;
-	//										}
-	//									}
-	//								}
-	//							}
-	//						}
-	//					}
-	//				}
-	//			}
-	//		}
-	//	}
-
-	//	maxconnectiontime.stop();
-	//}
-	//if (this->status != FT_OK) {
-	//	std::cout << "Could not open Hitachi HD44780: " << MY_LCD_DESCRIPTION << std::endl;
-	//}
-
-	//bool found = false;
-	//status = !FT_OK;
-	//bool error_log = true; // No usable LCD at start
-	//std::chrono::seconds MaxTime(LCD_MAX_CONNECTION_TIME);/*The display has a settling time after the physical connection so the attempt to connect
-	//											  will be done for a few seconds*/
-
-	//std::chrono::time_point<std::chrono::system_clock> start = std::chrono::system_clock::now();
-	//std::chrono::time_point<std::chrono::system_clock> current = start;
-
-	//while (status != FT_OK && ((current - start) < MaxTime))//loop till succesful connection o max connecting time is exceeded
-	//{
-	//	status = FT_OpenEx((void *)MY_LCD_DESCRIPTION, FT_OPEN_BY_DESCRIPTION, &(this->handle));
-
-	//	if (status == FT_OK)
-	//	{
-	//		UCHAR Mask = 0xFF;	//Selects all FTDI pins.
-	//		UCHAR Mode = 1; 	// Set asynchronous bit-bang mode
-	//		if (FT_SetBitMode(handle, Mask, Mode) == FT_OK)	// Sets LCD as asynch bit mode. Otherwise it doesn't work.
-	//		{
-	//			error_log = false;
-	//			sendByte(RS::INSTRUCTION_REGISTER, 0x02);
-	//			sendByte(RS::INSTRUCTION_REGISTER, 0x28);
-	//			sendByte(RS::INSTRUCTION_REGISTER, 0x0E);
-	//			sendByte(RS::INSTRUCTION_REGISTER, 0x06);
-	//			sendByte(RS::INSTRUCTION_REGISTER, LCD_FUNCTION_CLEAR_DISPLAY);
-	//			this->initerror = false;
-
-	//		}
-	//		else
-	//			printf("Couldn't configure LCD\n");
-	//	}
-	//	current = std::chrono::system_clock::now();
-	//}
-
-	//if (status != FT_OK)
-	//	printf("Couldn't open LCD\n");
 }
 
 Hitachi::~Hitachi()
 {
 }
 
-void Hitachi::sendNybble(RS registerselect, UCHAR data)
+void Hitachi::sendNybble(RS registerselect, UCHAR data) //Send nibble envia la parte BAJA de data.
 {
 	UCHAR buffer;
 
 	buffer = data << 4;
-	buffer = buffer & LCD_HIGH_NIBBLE;										//Limpio el low nibble y apago enable y register select
-	if (registerselect == RS::DATA_REGISTER) {								//Si me piden data register prendo register select
+	buffer = buffer & LCD_HIGH_NIBBLE;													//Limpio el low nibble y apago enable y register select
+	if (registerselect == RS::DATA_REGISTER) {											//Si me piden data register prendo register select
 		buffer = buffer | LCD_FUNCTION_RS_DATA_REGISTER;
 	}
 	this->status = FT_Write(this->handle, &buffer, sizeof(buffer), &bytesWritten);		//Escribo a LCD
-	this->wait(LCD_WAIT_TIME);												//Espero
-	buffer = buffer | LCD_FUNCTION_ENABLE_ON;								//Prendo enable
+	this->wait(LCD_WAIT_TIME);															//Espero
+	buffer = buffer | LCD_FUNCTION_ENABLE_ON;											//Prendo enable
 	this->status = FT_Write(this->handle, &buffer, sizeof(buffer), &bytesWritten);		//Escribo a LCD
-	this->wait(LCD_WAIT_TIME);												//Espero
-	buffer = buffer & (~LCD_FUNCTION_ENABLE_ON);								//Apago enable
+	this->wait(LCD_WAIT_TIME);															//Espero
+	buffer = buffer & (~LCD_FUNCTION_ENABLE_ON);										//Apago enable
 	this->status = FT_Write(this->handle, &buffer, sizeof(buffer), &bytesWritten);		//Escribo a LCD
-	this->wait(LCD_WAIT_TIME);												//Espero
+	this->wait(LCD_WAIT_TIME);															//Espero
 
 }
 
@@ -212,12 +58,23 @@ void Hitachi::sendByte(RS registerselect, UCHAR data)
 {
 	UCHAR buffer = data;
 	buffer = data >> 4;														//Mando high nybble de data a su low nybble
-	buffer = buffer & LCD_LOW_NIBBLE;										//Limpio el high nybble de data
+	buffer = buffer & LCD_LOW_NIBBLE;										//Limpio el high nybble del buffer
 	this->sendNybble(registerselect, buffer);								//Mando la parte superior de data como nybble
-	buffer = data & LCD_HIGH_NIBBLE;
+	buffer = data & LCD_LOW_NIBBLE;											//Limpio el high nybble de data
 	this->sendNybble(registerselect, buffer);								//Mando la parte inferior de data como nybble
 
+}
 
+void Hitachi::sendBytePreInit(UCHAR data) {
+	UCHAR buffer = data;
+	buffer = data;
+	this->status = FT_Write(handle, &buffer, sizeof(buffer), &bytesWritten);
+	this->wait(LCD_WAIT_TIME);
+	buffer = buffer | LCD_FUNCTION_ENABLE_ON;
+	this->status = FT_Write(handle, &buffer, sizeof(buffer), &bytesWritten);
+	this->wait(LCD_WAIT_TIME);
+	buffer = data;
+	this->status = FT_Write(handle, &buffer, sizeof(buffer), &bytesWritten);
 }
 
 bool Hitachi::lcdClear() {
@@ -228,9 +85,9 @@ bool Hitachi::lcdClear() {
 	sendByte(RS::INSTRUCTION_REGISTER, LCD_FUNCTION_CLEAR_DISPLAY); //Limpio el display
 
 	if (this->status == FT_OK) {
-		
+
 		sendByte(RS::INSTRUCTION_REGISTER, LCD_FUNCTION_RETURN_HOME); //Pongo el adress counter en 0.
-		
+
 		if (this->status == FT_OK) {
 			success = true;
 			this->lastCadd = this->cadd = 1;
