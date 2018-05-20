@@ -77,25 +77,6 @@ void Hitachi::sendByte(RS registerselect, UCHAR data)
 
 }
 
-//void Hitachi::sendBytePreInit(UCHAR data) {
-//
-//	UCHAR buffer = data;
-//	buffer = data;
-//
-//	this->status = FT_Write(handle, &buffer, sizeof(buffer), &bytesWritten);
-//	
-//	this->wait(LCD_WAIT_TIME);
-//
-//	buffer = buffer | LCD_FUNCTION_ENABLE_ON;
-//
-//	this->status = FT_Write(handle, &buffer, sizeof(buffer), &bytesWritten);
-//	
-//	this->wait(LCD_WAIT_TIME);
-//
-//	buffer = data;
-//	this->status = FT_Write(handle, &buffer, sizeof(buffer), &bytesWritten);
-//}
-
 bool Hitachi::lcdClear() {
 
 
@@ -109,7 +90,7 @@ bool Hitachi::lcdClear() {
 
 		if (this->status == FT_OK) {
 			success = true;
-			this->lastCadd = this->cadd = 1;
+			this->cadd = 1;
 		}
 	}
 
@@ -121,8 +102,8 @@ bool Hitachi::lcdClearToEOL() {
 
 	bool success = false;
 
-	while ((cadd % 16) != 0) {
-		this->lastCadd = this->cadd++; //Hago esto porque sé que el cursor se movió por si mismo y entonces registro dicho cambio en ambas variables.
+	while ((cadd % 17) != 0) {
+		this->cadd++; //Hago esto porque sé que el cursor se movió por si mismo y entonces registro dicho cambio
 		sendByte(RS::DATA_REGISTER, LCD_SPACE_CHAR); ///Ni idea cual char de la cartilla es el espacio, será lo que viene antes que el signo de exclamación?
 		success = true;
 	}
@@ -191,7 +172,7 @@ bool Hitachi::lcdSetCursorPosition(const cursorPosition pos) {
 	bool success = false;
 
 	if ((pos.column < 16) && (pos.row < 2)) {
-		this->cadd = 1 + pos.column + (15 * pos.row); //Me paro en la columna adecuada y luego, de ser necesario, bajo una fila.
+		this->cadd = 1 + pos.column + (16 * pos.row); //Me paro en la columna adecuada y luego, de ser necesario, bajo una fila.
 		success = true;
 		lcdUpdateCursor();
 	}
@@ -214,25 +195,10 @@ cursorPosition Hitachi::lcdGetCursorPosition() {
 
 void Hitachi::lcdUpdateCursor() {
 
-	UCHAR direction = LCD_FUNCTION_CURSOR_SHIFT; //Por default, shiftea hacia la izquierda.
-
-
-	if (this->cadd > this->lastCadd) { //cadd está a la derecha de lastCadd.
-
-		direction = direction | LCD_D2; //A partir de ahora shiftea hacia la derecha.
-
-		for (int i = 0; i < (this->cadd - this->lastCadd); i++)
-			sendByte(RS::INSTRUCTION_REGISTER, direction);
-	}
-	else if (this->lastCadd > this->cadd) { //cadd está más a la izquierda que lastCadd.
-
-		for (int i = 0; i < (this->lastCadd - this->cadd); i++)
-			sendByte(RS::INSTRUCTION_REGISTER, direction); //Envío que se mueva a la izquierda;
-
-	}
-
-
-	this->lastCadd = this->cadd; //Actualizo el valor de lastCadd.
+	if (this->cadd <= 16)
+		sendByte(RS::INSTRUCTION_REGISTER, (LCD_FUNCTION_SET_DDRAM_ADDRESS + (this->cadd - 1))); //Recordemos que cadd es el cursor address + 1.
+	else if(this->cadd)
+		sendByte(RS::INSTRUCTION_REGISTER, (LCD_FUNCTION_SET_DDRAM_ADDRESS | LCD_DISPLAY_LINE2) + (this->cadd - 17));
 
 }
 
@@ -248,8 +214,13 @@ Hitachi& Hitachi::operator<<(const unsigned char * c) {
 	} //Si el string tiene más de 32 caracteres, borro el primero hasta que queden solo 32.
 
 	for (unsigned int i = 0; i < str.size(); i++) {
+
+		if (this->cadd == 17) { //Cuando paso el 16, debo bajar.
+			sendByte(RS::INSTRUCTION_REGISTER, LCD_FUNCTION_SET_DDRAM_ADDRESS | LCD_DISPLAY_LINE2);
+		}
+
 		sendByte(RS::DATA_REGISTER, str[i]);
-		this->lastCadd = ++this->cadd; //Se que el cursor se movió, por lo que lo registro en cadd y lastCadd.
+		this->cadd++; //Se que el cursor se movió, por lo que lo registro en cadd
 	}
 
 
@@ -258,8 +229,12 @@ Hitachi& Hitachi::operator<<(const unsigned char * c) {
 
 Hitachi& Hitachi::operator<<(const unsigned char c) {
 
+	if (this->cadd == 17) { //Cuando paso al 16, debo bajar.
+		sendByte(RS::INSTRUCTION_REGISTER, LCD_FUNCTION_SET_DDRAM_ADDRESS | LCD_DISPLAY_LINE2);
+	}
+
 	sendByte(RS::DATA_REGISTER, c);
-	this->lastCadd = ++this->cadd; ///Nuevamente, falta trabajar los casos límites que, por lo menos a mi, me resultan un poco ambiguos en la consigna, e incluso aunque elija una interpretación ni idea de como solucionarlo.
+	this->cadd++; ///Nuevamente, falta trabajar los casos límites que, por lo menos a mi, me resultan un poco ambiguos en la consigna, e incluso aunque elija una interpretación ni idea de como solucionarlo.
 
 
 	return *this;

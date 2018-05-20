@@ -48,6 +48,10 @@
 #define LCD_FUNCTION_CURSOR_SHIFT (LCD_D4) //LCD_D2 debe setearse según se desee mover para la izquierda o para la derecha.
 
 #define LCD_SPACE_CHAR 0x20 /// Por ahora pongo este pero ni idea si está bien. Creo que si igual.
+#define LCD_DISPLAY_LINE2 0x40 //Posición de memoria de la segunda linea del display.
+
+#define LCD_FUNCTION_SET_DDRAM_ADDRESS LCD_D7 //Con ese bit encendido indico la instrucción de seteo de la posición del cursor. El resto de los bits indican dicha dirección.
+
 
 
 #define MY_LCD_DESCRIPTION "EDA LCD 3 B"
@@ -103,7 +107,6 @@ private:
 	bool initerror = true;
 
 	int cadd = 1; //Cursor Address.
-	int lastCadd = 1; //Variable que me srive para saber como y cuanto mover el cursor tras modificar cadd, ya que no puedo leer el cursor desde el FTDI.
 
 	void lcdUpdateCursor();
 

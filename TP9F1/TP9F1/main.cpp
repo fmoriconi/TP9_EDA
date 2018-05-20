@@ -15,16 +15,19 @@ int main(void)
 
 		char ch = NULL;
 
-		const unsigned char * str = (const unsigned char *) "ahre"; ///Si no casteo, no compila. 
+		//const unsigned char * str = (const unsigned char *) "ahre"; ///Si no casteo, no compila. 
 
-		hitachi << str; ///Eso está mal, porque yo aca debería poder poner el "ahre" directamente, y no lo hace.
+		//hitachi << (unsigned char *) "ALAN SE LA COME Y ARI SE LA DA"; ///Eso está mal, porque yo aca debería poder poner el "ahre" directamente, y no lo hace.
 
 
 
-		//while ( (ch = getchar() ) != 'q') ///Esto es un teclado con el cual podemos poner cualquier cosa.
+		//while ( (ch = getchar() ) != '}') ///Esto es un teclado con el cual podemos poner cualquier cosa.
 		//{
 		//	if(ch != '\n')
 		//		hitachi << ch;
+
+		//	if (ch == '{')
+		//		hitachi.lcdClear();
 		//}
 
 		hitachi.lcdClear();
@@ -47,7 +50,15 @@ int main(void)
 
 		hitachi << (const unsigned char *) "Izq.";
 
+		hitachi.lcdSetCursorPosition({ 1,0 });
 
+		hitachi << (const unsigned char *) "Izq.";
+
+		hitachi.lcdSetCursorPosition({ 0,0 });
+
+		hitachi << (const unsigned char *) "Clean 2 EOL:";
+
+		hitachi.lcdClearToEOL();
 
 		//hitachi.sendByte(RS::DATA_REGISTER, 0x41);
 		//hitachi.lcdMoveCursorRight();
