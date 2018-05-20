@@ -43,8 +43,8 @@
 #define LCD_FUNCTION_RETURN_HOME (0x02)
 #define LCD_FUNCTION_ENTRY_MODE_SET (LCD_D0|LCD_D1|LCD_D2)
 #define LCD_FUNCTION_DISPLAY_CONTROL_OFF (LCD_D3)
-#define LCD_FUNCTION_FUNCTION_SET_4_BIT	(LCD_D5|LCD_D3)
-#define LCD_FUNCTION_FUNCTION_SET_8_BIT (LCD_D5|LCD_D4|LCD_D3)
+#define LCD_FUNCTION_FUNCTION_SET_4_BIT	(LCD_D5)
+#define LCD_FUNCTION_FUNCTION_SET_8_BIT (LCD_D5|LCD_D4)
 #define LCD_FUNCTION_CURSOR_SHIFT (LCD_D4) //LCD_D2 debe setearse según se desee mover para la izquierda o para la derecha.
 
 #define LCD_SPACE_CHAR 0x20 /// Por ahora pongo este pero ni idea si está bien. Creo que si igual.
@@ -80,8 +80,8 @@ public:
 	bool lcdClearToEOL();
 
 	//Operadores
-	basicLCD& operator<<(const unsigned char c);
-	basicLCD& operator<<(const unsigned char * c);
+	Hitachi& operator<<(const unsigned char c);
+	Hitachi& operator<<(const unsigned char * c);
 
 	//Movimiento del cursor
 	bool lcdMoveCursorUp();
@@ -102,8 +102,8 @@ private:
 
 	bool initerror = true;
 
-	int cadd = 0; //Cursor Address.
-	int lastCadd = 0; //Variable que me srive para saber como y cuanto mover el cursor tras modificar cadd, ya que no puedo leer el cursor desde el FTDI.
+	int cadd = 1; //Cursor Address.
+	int lastCadd = 1; //Variable que me srive para saber como y cuanto mover el cursor tras modificar cadd, ya que no puedo leer el cursor desde el FTDI.
 
 	void lcdUpdateCursor();
 

@@ -4,21 +4,31 @@
 
 Hitachi::Hitachi()
 {
-	UCHAR buffer;
+	//UCHAR buffer;
 	Timer timer, maxconnectiontime;
+	this->status = FT_OTHER_ERROR;
 
-	while (this->status = !FT_OK && maxconnectiontime.getTime() < LCD_MAX_CONNECTION_TIME) {
+	while (this->status != FT_OK && maxconnectiontime.getTime() < LCD_MAX_CONNECTION_TIME) {
+
 		if (FT_OpenEx((PVOID)MY_LCD_DESCRIPTION, FT_OPEN_BY_DESCRIPTION, &(this->handle)) == FT_OK) {
+
 			if (FT_SetBitMode((handle), LCD_BYTE, 1) == FT_OK) {
-				sendBytePreInit(LCD_FUNCTION_FUNCTION_SET_8_BIT & LCD_HIGH_NIBBLE);
-				sendBytePreInit(LCD_FUNCTION_FUNCTION_SET_8_BIT & LCD_HIGH_NIBBLE);
-				sendBytePreInit(LCD_FUNCTION_FUNCTION_SET_8_BIT & LCD_HIGH_NIBBLE);
-				sendBytePreInit(LCD_FUNCTION_FUNCTION_SET_8_BIT & LCD_HIGH_NIBBLE);
-				sendByte(RS::INSTRUCTION_REGISTER, LCD_FUNCTION_FUNCTION_SET_4_BIT);
+
+				sendNybble(RS::INSTRUCTION_REGISTER, LCD_FUNCTION_FUNCTION_SET_8_BIT >> 4);
+				do { timer.stop(); } while (timer.getTime() < 5);
+				sendNybble(RS::INSTRUCTION_REGISTER, LCD_FUNCTION_FUNCTION_SET_8_BIT >> 4);
+				do { timer.stop(); } while (timer.getTime() < 5);
+				sendNybble(RS::INSTRUCTION_REGISTER, LCD_FUNCTION_FUNCTION_SET_8_BIT >> 4);
+				sendNybble(RS::INSTRUCTION_REGISTER, LCD_FUNCTION_FUNCTION_SET_4_BIT >> 4);
+
+				sendByte(RS::INSTRUCTION_REGISTER, LCD_FUNCTION_FUNCTION_SET_4_BIT | LCD_D3);
 				sendByte(RS::INSTRUCTION_REGISTER, LCD_FUNCTION_DISPLAY_CONTROL_OFF);
 				sendByte(RS::INSTRUCTION_REGISTER, LCD_FUNCTION_CLEAR_DISPLAY);
-				sendByte(RS::INSTRUCTION_REGISTER, LCD_FUNCTION_ENTRY_MODE_SET);
+				sendByte(RS::INSTRUCTION_REGISTER, LCD_D3 | LCD_D2);
+
 				this->status = FT_OK;
+				this->initerror = false;
+
 			}
 		}
 		maxconnectiontime.stop();
@@ -40,9 +50,11 @@ void Hitachi::sendNybble(RS registerselect, UCHAR data) //Send nibble envia la p
 
 	buffer = data << 4;
 	buffer = buffer & LCD_HIGH_NIBBLE;													//Limpio el low nibble y apago enable y register select
+	
 	if (registerselect == RS::DATA_REGISTER) {											//Si me piden data register prendo register select
 		buffer = buffer | LCD_FUNCTION_RS_DATA_REGISTER;
 	}
+
 	this->status = FT_Write(this->handle, &buffer, sizeof(buffer), &bytesWritten);		//Escribo a LCD
 	this->wait(LCD_WAIT_TIME);															//Espero
 	buffer = buffer | LCD_FUNCTION_ENABLE_ON;											//Prendo enable
@@ -65,17 +77,24 @@ void Hitachi::sendByte(RS registerselect, UCHAR data)
 
 }
 
-void Hitachi::sendBytePreInit(UCHAR data) {
-	UCHAR buffer = data;
-	buffer = data;
-	this->status = FT_Write(handle, &buffer, sizeof(buffer), &bytesWritten);
-	this->wait(LCD_WAIT_TIME);
-	buffer = buffer | LCD_FUNCTION_ENABLE_ON;
-	this->status = FT_Write(handle, &buffer, sizeof(buffer), &bytesWritten);
-	this->wait(LCD_WAIT_TIME);
-	buffer = data;
-	this->status = FT_Write(handle, &buffer, sizeof(buffer), &bytesWritten);
-}
+//void Hitachi::sendBytePreInit(UCHAR data) {
+//
+//	UCHAR buffer = data;
+//	buffer = data;
+//
+//	this->status = FT_Write(handle, &buffer, sizeof(buffer), &bytesWritten);
+//	
+//	this->wait(LCD_WAIT_TIME);
+//
+//	buffer = buffer | LCD_FUNCTION_ENABLE_ON;
+//
+//	this->status = FT_Write(handle, &buffer, sizeof(buffer), &bytesWritten);
+//	
+//	this->wait(LCD_WAIT_TIME);
+//
+//	buffer = data;
+//	this->status = FT_Write(handle, &buffer, sizeof(buffer), &bytesWritten);
+//}
 
 bool Hitachi::lcdClear() {
 
@@ -172,7 +191,7 @@ bool Hitachi::lcdSetCursorPosition(const cursorPosition pos) {
 	bool success = false;
 
 	if ((pos.column < 16) && (pos.row < 2)) {
-		this->cadd = pos.column + (15 * pos.row); //Me paro en la columna adecuada y luego, de ser necesario, bajo una fila.
+		this->cadd = 1 + pos.column + (15 * pos.row); //Me paro en la columna adecuada y luego, de ser necesario, bajo una fila.
 		success = true;
 		lcdUpdateCursor();
 	}
@@ -200,14 +219,14 @@ void Hitachi::lcdUpdateCursor() {
 
 	if (this->cadd > this->lastCadd) { //cadd está a la derecha de lastCadd.
 
-		direction = direction | LCD_D3; //A partir de ahora shiftea hacia la derecha.
+		direction = direction | LCD_D2; //A partir de ahora shiftea hacia la derecha.
 
 		for (int i = 0; i < (this->cadd - this->lastCadd); i++)
 			sendByte(RS::INSTRUCTION_REGISTER, direction);
 	}
 	else if (this->lastCadd > this->cadd) { //cadd está más a la izquierda que lastCadd.
 
-		for (int i = 0; i < (this->cadd - this->lastCadd); i++)
+		for (int i = 0; i < (this->lastCadd - this->cadd); i++)
 			sendByte(RS::INSTRUCTION_REGISTER, direction); //Envío que se mueva a la izquierda;
 
 	}
@@ -217,30 +236,32 @@ void Hitachi::lcdUpdateCursor() {
 
 }
 
-//basicLCD& Hitachi::operator<<(const unsigned char * c) {
-//
-//	std::string str = "";
-//
-//	for (int i = 0; *(c + i) != '/0'; i++)
-//		str += *(c); //Agrego cada caracter al string.
-//
-//	while (str.size() > 32) {
-//		str.erase(0, 1);
-//	} //Si el string tiene más de 32 caracteres, borro el primero hasta que queden solo 32.
-//
-//	for (unsigned int i = 0; i < str.size(); i++) {
-//		sendByte(RS::DATA_REGISTER, str[i]);
-//		this->lastCadd = this->cadd++; //Se que el cursor se movió, por lo que lo registro en cadd y lastCadd.
-//	} ///¿Qué pasa si ya tenía algo escrito y se llena el display? ¿Se sobreescribe? Si es así, ¿Como?
-//
-//}
-//
-//basicLCD& Hitachi::operator<<(const unsigned char c) {
-//
-//	sendByte(RS::DATA_REGISTER, c);
-//	this->lastCadd = this->cadd++; ///Nuevamente, falta trabajar los casos límites que, por lo menos a mi, me resultan un poco ambiguos en la consigna, e incluso aunque elija una interpretación ni idea de como solucionarlo.
-//
-//	return;
-//
-//}
+Hitachi& Hitachi::operator<<(const unsigned char * c) {
+
+	std::string str = "";
+
+	for (int i = 0; *(c + i) != '\0'; i++)
+		str += *(c+i); //Agrego cada caracter al string.
+
+	while (str.size() > 32) {
+		str.erase(0, 1);
+	} //Si el string tiene más de 32 caracteres, borro el primero hasta que queden solo 32.
+
+	for (unsigned int i = 0; i < str.size(); i++) {
+		sendByte(RS::DATA_REGISTER, str[i]);
+		this->lastCadd = ++this->cadd; //Se que el cursor se movió, por lo que lo registro en cadd y lastCadd.
+	}
+
+
+	return *this;
+}
+
+Hitachi& Hitachi::operator<<(const unsigned char c) {
+
+	sendByte(RS::DATA_REGISTER, c);
+	this->lastCadd = ++this->cadd; ///Nuevamente, falta trabajar los casos límites que, por lo menos a mi, me resultan un poco ambiguos en la consigna, e incluso aunque elija una interpretación ni idea de como solucionarlo.
+
+
+	return *this;
+}
 ///Esto no estoy entendiendo bien que corno retornean.
