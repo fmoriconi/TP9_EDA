@@ -8,9 +8,13 @@
 #include "ftd2xx.h"
 #include "Hitachi.h"
 
+
+#define MY_LCD_DESCRIPTION "EDA LCD 3 B"
+
+
 int main(void)
 {
-	Hitachi hitachi;
+	Hitachi hitachi(MY_LCD_DESCRIPTION);
 	if (hitachi.lcdInitOk()) {
 
 		char ch = NULL;
@@ -21,16 +25,16 @@ int main(void)
 
 
 
-		//while ( (ch = getchar() ) != '}') ///Esto es un teclado con el cual podemos poner cualquier cosa.
-		//{
-		//	if(ch != '\n')
-		//		hitachi << ch;
+		while ( (ch = getchar() ) != '}') ///Esto es un teclado con el cual podemos poner cualquier cosa.
+		{
+			if(ch != '\n')
+				hitachi << ch;
 
-		//	if (ch == '{')
-		//		hitachi.lcdClear();
-		//}
+			if (ch == '{')
+				hitachi.lcdClear();
+		}
 
-		hitachi.lcdClear();
+		/*hitachi.lcdClear();
 
 		hitachi.lcdMoveCursorRight();
 		hitachi.lcdMoveCursorRight();
@@ -59,7 +63,7 @@ int main(void)
 		hitachi << (const unsigned char *) "Clean 2 EOL:";
 
 		hitachi.lcdClearToEOL();
-
+*/
 		//hitachi.sendByte(RS::DATA_REGISTER, 0x41);
 		//hitachi.lcdMoveCursorRight();
 		//hitachi.sendByte(RS::DATA_REGISTER, 0x6C);
@@ -90,7 +94,7 @@ int main(void)
 		std::cout << "nice";
 	}
 	else
-		std::cout << "fuck";
+		std::cout << "lol";
 	getchar();
 	return 0;
 }

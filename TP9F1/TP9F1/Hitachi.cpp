@@ -2,41 +2,16 @@
 
 
 
-Hitachi::Hitachi()
+Hitachi::Hitachi(const char* lcd_description)
 {
-	//UCHAR buffer;
-	Timer timer, maxconnectiontime;
-	this->status = FT_OTHER_ERROR;
-
-	while (this->status != FT_OK && maxconnectiontime.getTime() < LCD_MAX_CONNECTION_TIME) {
-
-		if (FT_OpenEx((PVOID)MY_LCD_DESCRIPTION, FT_OPEN_BY_DESCRIPTION, &(this->handle)) == FT_OK) {
-
-			if (FT_SetBitMode((handle), LCD_BYTE, 1) == FT_OK) {
-
-				sendNybble(RS::INSTRUCTION_REGISTER, LCD_FUNCTION_FUNCTION_SET_8_BIT >> 4);
-				do { timer.stop(); } while (timer.getTime() < 5);
-				sendNybble(RS::INSTRUCTION_REGISTER, LCD_FUNCTION_FUNCTION_SET_8_BIT >> 4);
-				do { timer.stop(); } while (timer.getTime() < 5);
-				sendNybble(RS::INSTRUCTION_REGISTER, LCD_FUNCTION_FUNCTION_SET_8_BIT >> 4);
-				sendNybble(RS::INSTRUCTION_REGISTER, LCD_FUNCTION_FUNCTION_SET_4_BIT >> 4);
-
-				sendByte(RS::INSTRUCTION_REGISTER, LCD_FUNCTION_FUNCTION_SET_4_BIT | LCD_D3);
-				sendByte(RS::INSTRUCTION_REGISTER, LCD_FUNCTION_DISPLAY_CONTROL_OFF);
-				sendByte(RS::INSTRUCTION_REGISTER, LCD_FUNCTION_CLEAR_DISPLAY);
-				sendByte(RS::INSTRUCTION_REGISTER, LCD_D3 | LCD_D2);
-
-				this->status = FT_OK;
-				this->initerror = false;
-
-			}
-		}
-		maxconnectiontime.stop();
-	}
-
-	if (this->status != FT_OK) {
-		std::cout << "sos puto" << std::endl;
+	std::string desc = lcd_description;
+	if (!(initDisplay(&(this->handle), lcd_description))) {
+		std::cout << "Could not load LCD Hitachi: " << desc << std::endl;
+		std::cout << "Check if the LCD description is right, or if the LCD is plugged in." << std::endl;
 		getchar();
+	}
+	else {
+		this->initerror = false;
 	}
 }
 
@@ -46,39 +21,15 @@ Hitachi::~Hitachi()
 
 void Hitachi::sendNybble(RS registerselect, UCHAR data) //Send nibble envia la parte BAJA de data.
 {
-	UCHAR buffer;
-
-	buffer = data << 4;
-	buffer = buffer & LCD_HIGH_NIBBLE;													//Limpio el low nibble y apago enable y register select
-	
-	if (registerselect == RS::DATA_REGISTER) {											//Si me piden data register prendo register select
-		buffer = buffer | LCD_FUNCTION_RS_DATA_REGISTER;
-	}
-
-	this->status = FT_Write(this->handle, &buffer, sizeof(buffer), &bytesWritten);		//Escribo a LCD
-	this->wait(LCD_WAIT_TIME);															//Espero
-	buffer = buffer | LCD_FUNCTION_ENABLE_ON;											//Prendo enable
-	this->status = FT_Write(this->handle, &buffer, sizeof(buffer), &bytesWritten);		//Escribo a LCD
-	this->wait(LCD_WAIT_TIME);															//Espero
-	buffer = buffer & (~LCD_FUNCTION_ENABLE_ON);										//Apago enable
-	this->status = FT_Write(this->handle, &buffer, sizeof(buffer), &bytesWritten);		//Escribo a LCD
-	this->wait(LCD_WAIT_TIME);															//Espero
-
+	this->status = sendNybbleLow(registerselect, data, &handle);
 }
 
 void Hitachi::sendByte(RS registerselect, UCHAR data)
 {
-	UCHAR buffer = data;
-	buffer = data >> 4;														//Mando high nybble de data a su low nybble
-	buffer = buffer & LCD_LOW_NIBBLE;										//Limpio el high nybble del buffer
-	this->sendNybble(registerselect, buffer);								//Mando la parte superior de data como nybble
-	buffer = data & LCD_LOW_NIBBLE;											//Limpio el high nybble de data
-	this->sendNybble(registerselect, buffer);								//Mando la parte inferior de data como nybble
-
+	this->status = sendByteLow(registerselect, data, &handle);
 }
 
 bool Hitachi::lcdClear() {
-
 
 	bool success = false;
 
@@ -102,11 +53,17 @@ bool Hitachi::lcdClearToEOL() {
 
 	bool success = false;
 
+	int temp = this->cadd;
+
 	while ((cadd % 17) != 0) {
 		this->cadd++; //Hago esto porque sé que el cursor se movió por si mismo y entonces registro dicho cambio
 		sendByte(RS::DATA_REGISTER, LCD_SPACE_CHAR); ///Ni idea cual char de la cartilla es el espacio, será lo que viene antes que el signo de exclamación?
 		success = true;
 	}
+
+	this->cadd = temp;
+
+	lcdUpdateCursor();
 
 	return success;
 
@@ -197,7 +154,7 @@ void Hitachi::lcdUpdateCursor() {
 
 	if (this->cadd <= 16)
 		sendByte(RS::INSTRUCTION_REGISTER, (LCD_FUNCTION_SET_DDRAM_ADDRESS + (this->cadd - 1))); //Recordemos que cadd es el cursor address + 1.
-	else if(this->cadd)
+	else if(this->cadd > 16)
 		sendByte(RS::INSTRUCTION_REGISTER, (LCD_FUNCTION_SET_DDRAM_ADDRESS | LCD_DISPLAY_LINE2) + (this->cadd - 17));
 
 }
@@ -221,8 +178,16 @@ Hitachi& Hitachi::operator<<(const unsigned char * c) {
 
 		sendByte(RS::DATA_REGISTER, str[i]);
 		this->cadd++; //Se que el cursor se movió, por lo que lo registro en cadd
+		if (this->cadd > 32) {
+			Timer waitForNewLine;
+			do {
+				waitForNewLine.stop();
+			} while (waitForNewLine.getTime() < 1000);
+			this->lcdClear();
+			this->cadd = 1;
+			this->lcdUpdateCursor();
+		}
 	}
-
 
 	return *this;
 }
@@ -235,7 +200,16 @@ Hitachi& Hitachi::operator<<(const unsigned char c) {
 
 	sendByte(RS::DATA_REGISTER, c);
 	this->cadd++; ///Nuevamente, falta trabajar los casos límites que, por lo menos a mi, me resultan un poco ambiguos en la consigna, e incluso aunque elija una interpretación ni idea de como solucionarlo.
-
+	if (this->cadd > 32) {
+		Timer waitForNewLine;
+		do {
+			waitForNewLine.stop();
+		} while (waitForNewLine.getTime() < 1000);
+		this->lcdClear();
+		this->lcdClear();
+		this->cadd = 1;
+		this->lcdUpdateCursor();
+	}
 
 	return *this;
 }

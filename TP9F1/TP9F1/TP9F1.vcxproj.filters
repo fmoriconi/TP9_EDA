@@ -24,6 +24,9 @@
     <ClCompile Include="Hitachi.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="LCDLow.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Timer.h">
@@ -33,6 +36,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="basicLCD.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LCDLow.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

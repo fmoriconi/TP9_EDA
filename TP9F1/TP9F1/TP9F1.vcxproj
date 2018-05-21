@@ -20,12 +20,14 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Hitachi.cpp" />
+    <ClCompile Include="LCDLow.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Timer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="basicLCD.h" />
     <ClInclude Include="Hitachi.h" />
+    <ClInclude Include="LCDLow.h" />
     <ClInclude Include="Timer.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
