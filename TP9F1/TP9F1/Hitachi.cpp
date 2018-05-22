@@ -1,6 +1,6 @@
 #include "Hitachi.h"
 
-
+#define LCD_CLEAR_TIME 350
 
 Hitachi::Hitachi(const char* lcd_description)
 {
@@ -162,13 +162,18 @@ void Hitachi::lcdUpdateCursor() {
 Hitachi& Hitachi::operator<<(const unsigned char * c) {
 
 	std::string str = "";
+	bool maxSize = false; //Bool para indicar si el string es mayor a 31 caracteres.
 
 	for (int i = 0; *(c + i) != '\0'; i++)
 		str += *(c+i); //Agrego cada caracter al string.
 
 	while (str.size() > 32) {
 		str.erase(0, 1);
+		maxSize = true;
 	} //Si el string tiene más de 32 caracteres, borro el primero hasta que queden solo 32.
+
+	if (maxSize)
+		lcdClear();
 
 	for (unsigned int i = 0; i < str.size(); i++) {
 
@@ -178,11 +183,13 @@ Hitachi& Hitachi::operator<<(const unsigned char * c) {
 
 		sendByte(RS::DATA_REGISTER, str[i]);
 		this->cadd++; //Se que el cursor se movió, por lo que lo registro en cadd
+
+
 		if (this->cadd > 32) {
 			Timer waitForNewLine;
 			do {
 				waitForNewLine.stop();
-			} while (waitForNewLine.getTime() < 1000);
+			} while (waitForNewLine.getTime() < LCD_CLEAR_TIME);
 			this->lcdClear();
 			this->cadd = 1;
 			this->lcdUpdateCursor();
@@ -204,7 +211,7 @@ Hitachi& Hitachi::operator<<(const unsigned char c) {
 		Timer waitForNewLine;
 		do {
 			waitForNewLine.stop();
-		} while (waitForNewLine.getTime() < 1000);
+		} while (waitForNewLine.getTime() < LCD_CLEAR_TIME);
 		this->lcdClear();
 		this->lcdClear();
 		this->cadd = 1;

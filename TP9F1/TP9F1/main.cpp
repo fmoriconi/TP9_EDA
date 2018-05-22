@@ -19,13 +19,7 @@ int main(void)
 
 		char ch = NULL;
 
-		//const unsigned char * str = (const unsigned char *) "ahre"; ///Si no casteo, no compila. 
-
-		//hitachi << (unsigned char *) "ALAN SE LA COME Y ARI SE LA DA"; ///Eso está mal, porque yo aca debería poder poner el "ahre" directamente, y no lo hace.
-
-
-
-		while ( (ch = getchar() ) != '}') ///Esto es un teclado con el cual podemos poner cualquier cosa.
+		while ( (ch = getchar() ) != '}') ///Esto es un teclado con el cual podemos probar el display char a char. Con { se limpia la pantalla y con } se cierra el programa.
 		{
 			if(ch != '\n')
 				hitachi << ch;
@@ -33,6 +27,8 @@ int main(void)
 			if (ch == '{')
 				hitachi.lcdClear();
 		}
+
+		hitachi << (unsigned char *) "A ver a ver que pasa si pongo algo suuuuuuuuuuuuuuuuuuuuuper largo";
 
 		/*hitachi.lcdClear();
 
@@ -90,11 +86,9 @@ int main(void)
 		//hitachi.sendByte(RS::DATA_REGISTER, 0x6D);
 		//hitachi.sendByte(RS::DATA_REGISTER, 0x65);
 		//hitachi.sendByte(RS::DATA_REGISTER, 0x20);
-
-		std::cout << "nice";
 	}
 	else
 		std::cout << "lol";
-	getchar();
+
 	return 0;
 }
