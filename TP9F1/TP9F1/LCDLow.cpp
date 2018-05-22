@@ -20,7 +20,7 @@ bool initDisplay(FT_HANDLE * handle_, const char* lcd_description) {
 				sendByteLow(RS::INSTRUCTION_REGISTER, LCD_FUNCTION_FUNCTION_SET_4_BIT | LCD_D3, handle_);
 				sendByteLow(RS::INSTRUCTION_REGISTER, LCD_FUNCTION_DISPLAY_CONTROL_OFF, handle_);
 				sendByteLow(RS::INSTRUCTION_REGISTER, LCD_FUNCTION_CLEAR_DISPLAY, handle_);
-				sendByteLow(RS::INSTRUCTION_REGISTER, LCD_D3 | LCD_D2, handle_);
+				sendByteLow(RS::INSTRUCTION_REGISTER, LCD_FUNCTION_ENTRY_MODE_SET, handle_);
 
 				status = FT_OK;
 			}

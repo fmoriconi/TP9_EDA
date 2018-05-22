@@ -19,7 +19,7 @@ public:
 	//--------Métodos públicos heredados--------//
 
 	//Getters
-	void wait(float ms) { auxtimer.start(); do { auxtimer.stop(); } while (auxtimer.getTime() < LCD_WAIT_TIME); }
+	void wait(float ms) { auxtimer.start(); do { auxtimer.stop(); } while (auxtimer.getTime() < ms); }
 	bool lcdInitOk() { return !initerror; }
 	FT_STATUS lcdGetError() { return this->status; }
 

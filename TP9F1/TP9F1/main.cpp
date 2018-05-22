@@ -8,18 +8,32 @@
 #include "ftd2xx.h"
 #include "Hitachi.h"
 
+//EJEMPLO PARA USAR LA LIBRERIA HITACHI MADE BY GRUPO 3
 
 #define MY_LCD_DESCRIPTION "EDA LCD 3 B"
-
 
 int main(void)
 {
 	Hitachi hitachi(MY_LCD_DESCRIPTION);
 	if (hitachi.lcdInitOk()) {
 
-		char ch = NULL;
 
-		while ( (ch = getchar() ) != '}') ///Esto es un teclado con el cual podemos probar el display char a char. Con { se limpia la pantalla y con } se cierra el programa.
+	//Presentacion
+		hitachi << (const unsigned char *)"    LOADING..    " ;
+		for (int i = 0; i < 13; i++) {
+			hitachi << (char)0xFF;
+			hitachi.wait(50);
+		}
+		hitachi.sendByte(RS::DATA_REGISTER, 0xFF);
+		hitachi.wait(700);
+		hitachi.lcdClear();
+		hitachi << (const unsigned char*)"     READY!     ";
+		hitachi.wait(400);
+		hitachi.lcdClear();
+
+	//Mini tecladito
+		char ch = NULL;
+		while ( (ch = getchar() ) != '}') //Esto es un teclado con el cual podemos probar el display char a char. Con { se limpia la pantalla y con } se cierra el programa.
 		{
 			if(ch != '\n')
 				hitachi << ch;
@@ -27,68 +41,14 @@ int main(void)
 			if (ch == '{')
 				hitachi.lcdClear();
 		}
-
-		hitachi << (unsigned char *) "A ver a ver que pasa si pongo algo suuuuuuuuuuuuuuuuuuuuuper largo";
-
-		/*hitachi.lcdClear();
-
-		hitachi.lcdMoveCursorRight();
-		hitachi.lcdMoveCursorRight();
-		hitachi.lcdMoveCursorRight();
-		hitachi.lcdMoveCursorRight();
-		hitachi.lcdMoveCursorRight();
-		hitachi.lcdMoveCursorRight();
-
-		hitachi << (const unsigned char *) "Mid.";
-
-		hitachi.lcdMoveCursorRight();
-		hitachi.lcdMoveCursorRight();
-
-		hitachi << (const unsigned char *) "Der.";
-
-		hitachi.lcdSetCursorPosition({ 0,0 });
-
-		hitachi << (const unsigned char *) "Izq.";
-
-		hitachi.lcdSetCursorPosition({ 1,0 });
-
-		hitachi << (const unsigned char *) "Izq.";
-
-		hitachi.lcdSetCursorPosition({ 0,0 });
-
-		hitachi << (const unsigned char *) "Clean 2 EOL:";
-
-		hitachi.lcdClearToEOL();
-*/
-		//hitachi.sendByte(RS::DATA_REGISTER, 0x41);
-		//hitachi.lcdMoveCursorRight();
-		//hitachi.sendByte(RS::DATA_REGISTER, 0x6C);
-		//hitachi.lcdMoveCursorRight();
-		//hitachi.sendByte(RS::DATA_REGISTER, 0x61);
-		//hitachi.lcdMoveCursorRight();
-		//hitachi.sendByte(RS::DATA_REGISTER, 0x6E);
-		//hitachi.lcdMoveCursorLeft();
-		//hitachi.lcdMoveCursorLeft();
-		//hitachi.lcdMoveCursorLeft();
-		//hitachi.lcdMoveCursorLeft();
-		//hitachi.lcdMoveCursorLeft();
-		//hitachi.lcdMoveCursorLeft();
-		//hitachi.sendByte(RS::DATA_REGISTER, 0x20);
-
-		//hitachi.sendByte(RS::DATA_REGISTER, 0x73);
-		//hitachi.sendByte(RS::DATA_REGISTER, 0x65);
-		//hitachi.sendByte(RS::DATA_REGISTER, 0x20);
-		//hitachi.sendByte(RS::DATA_REGISTER, 0x6C);
-		//hitachi.sendByte(RS::DATA_REGISTER, 0x61);
-		//hitachi.sendByte(RS::DATA_REGISTER, 0x20);
-		//hitachi.sendByte(RS::DATA_REGISTER, 0x63);
-		//hitachi.sendByte(RS::DATA_REGISTER, 0x6F);
-		//hitachi.sendByte(RS::DATA_REGISTER, 0x6D);
-		//hitachi.sendByte(RS::DATA_REGISTER, 0x65);
-		//hitachi.sendByte(RS::DATA_REGISTER, 0x20);
 	}
-	else
-		std::cout << "lol";
+
+	//Error
+	else {
+		std::cout << "Could not load LCD Hitachi: " << MY_LCD_DESCRIPTION << std::endl;
+		std::cout << "Check if the LCD description is right, or if the LCD is plugged in." << std::endl;
+		getchar();
+	}
 
 	return 0;
 }

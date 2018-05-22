@@ -5,12 +5,7 @@
 Hitachi::Hitachi(const char* lcd_description)
 {
 	std::string desc = lcd_description;
-	if (!(initDisplay(&(this->handle), lcd_description))) {
-		std::cout << "Could not load LCD Hitachi: " << desc << std::endl;
-		std::cout << "Check if the LCD description is right, or if the LCD is plugged in." << std::endl;
-		getchar();
-	}
-	else {
+	if (initDisplay(&(this->handle), lcd_description)) {
 		this->initerror = false;
 	}
 }
@@ -185,7 +180,8 @@ Hitachi& Hitachi::operator<<(const unsigned char * c) {
 		this->cadd++; //Se que el cursor se movió, por lo que lo registro en cadd
 
 
-		if (this->cadd > 32) {
+		if (this->cadd > 31) {
+			sendByte(RS::DATA_REGISTER, 0xE7);
 			Timer waitForNewLine;
 			do {
 				waitForNewLine.stop();
@@ -207,12 +203,12 @@ Hitachi& Hitachi::operator<<(const unsigned char c) {
 
 	sendByte(RS::DATA_REGISTER, c);
 	this->cadd++; ///Nuevamente, falta trabajar los casos límites que, por lo menos a mi, me resultan un poco ambiguos en la consigna, e incluso aunque elija una interpretación ni idea de como solucionarlo.
-	if (this->cadd > 32) {
+	if (this->cadd > 31) {
+		sendByte(RS::DATA_REGISTER, 0x7E);
 		Timer waitForNewLine;
 		do {
 			waitForNewLine.stop();
 		} while (waitForNewLine.getTime() < LCD_CLEAR_TIME);
-		this->lcdClear();
 		this->lcdClear();
 		this->cadd = 1;
 		this->lcdUpdateCursor();
